@@ -90,7 +90,7 @@ export default function App() {
       const pdfBytes = await buildPdf(pages, fit, (completed) =>
         setProgressLabel(`${completed}/${total}`),
       );
-      const downloadUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+      const downloadUrl = URL.createObjectURL(new Blob([new Uint8Array(pdfBytes)],{ type: 'application/pdf' }));
       const downloadLink = document.createElement('a');
       downloadLink.href = downloadUrl;
       downloadLink.download = `scan-${Date.now()}.pdf`;
