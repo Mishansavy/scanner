@@ -2,8 +2,16 @@ import type { Page } from '../types';
 import { warpPerspective } from './geometry';
 import { applyGrayscale, applyDocumentThreshold } from './filters';
 
-const MAX_LONG_EDGE = 2000;
-const JPEG_QUALITY = 0.75;
+export const QUALITY_PRESETS = {
+  small: { label: 'Small file', maxLongEdge: 1400, jpegQuality: 0.6 },
+  balanced: { label: 'Balanced', maxLongEdge: 2000, jpegQuality: 0.75 },
+  high: { label: 'High quality', maxLongEdge: 2800, jpegQuality: 0.9 },
+} as const;
+
+export type QualityPreset = keyof typeof QUALITY_PRESETS;
+
+const MAX_LONG_EDGE = QUALITY_PRESETS.balanced.maxLongEdge;
+const JPEG_QUALITY = QUALITY_PRESETS.balanced.jpegQuality;
 
 export type RenderedPage = { bytes: ArrayBuffer; width: number; height: number };
 
@@ -17,7 +25,8 @@ function createCanvas(width: number, height: number) {
 
 export async function renderPage(
   page: Page,
-  maxLongEdge = MAX_LONG_EDGE,
+  maxLongEdge: number = MAX_LONG_EDGE,
+  jpegQuality: number = JPEG_QUALITY,
 ): Promise<RenderedPage> {
   const bitmap = await createImageBitmap(page.file, { imageOrientation: 'from-image' });
   const scale = Math.min(1, maxLongEdge / Math.max(bitmap.width, bitmap.height));
@@ -59,7 +68,7 @@ export async function renderPage(
     outputCanvas.toBlob(
       (result) => (result ? resolve(result) : reject(new Error('Encode failed'))),
       'image/jpeg',
-      JPEG_QUALITY,
+      jpegQuality,
     ),
   );
 

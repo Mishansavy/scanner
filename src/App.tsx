@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import type { Filter, Page, Rotation } from './types';
 import { detectImageKind } from './lib/sniff';
-import { buildPdf } from './lib/pdf';
+import { buildPdf, PAGE_SIZES } from './lib/pdf';
 import type { PageFit } from './lib/pdf';
+import { QUALITY_PRESETS } from './lib/render';
+import type { QualityPreset } from './lib/render';
 import { CropEditor } from './components/CropEditor';
 import { PagePreview } from './components/PagePreview';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -12,6 +14,7 @@ import './App.css';
 export default function App() {
   const [pages, setPages] = useState<Page[]>([]);
   const [fit, setFit] = useState<PageFit>('a4');
+  const [quality, setQuality] = useState<QualityPreset>('balanced');
   const [progressLabel, setProgressLabel] = useState<string | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
@@ -84,7 +87,7 @@ export default function App() {
     const total = pages.length;
     setProgressLabel(`0/${total}`);
     try {
-      const pdfBytes = await buildPdf(pages, fit, (completed) =>
+      const pdfBytes = await buildPdf(pages, fit, quality, (completed) =>
         setProgressLabel(`${completed}/${total}`),
       );
       const downloadUrl = URL.createObjectURL(new Blob([new Uint8Array(pdfBytes)],{ type: 'application/pdf' }));
@@ -150,9 +153,24 @@ export default function App() {
           />
         </label>
         <span className="spacer" />
-        <select value={fit} onChange={(event) => setFit(event.target.value as PageFit)}>
-          <option value="a4">A4</option>
+        <select
+          aria-label="Page size"
+          value={fit}
+          onChange={(event) => setFit(event.target.value as PageFit)}
+        >
+          {Object.entries(PAGE_SIZES).map(([value, size]) => (
+            <option key={value} value={value}>{size.label}</option>
+          ))}
           <option value="image">Image size</option>
+        </select>
+        <select
+          aria-label="Quality"
+          value={quality}
+          onChange={(event) => setQuality(event.target.value as QualityPreset)}
+        >
+          {Object.entries(QUALITY_PRESETS).map(([value, preset]) => (
+            <option key={value} value={value}>{preset.label}</option>
+          ))}
         </select>
         <button
           className="btn-primary"
