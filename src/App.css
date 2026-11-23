@@ -159,6 +159,12 @@ button:disabled {
 
 .dropping { outline: 2px dashed var(--color-accent); outline-offset: -8px; }
 
+.progress { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-ink-muted); }
+.progress progress { flex: 1; height: var(--space-2); appearance: none; border: var(--border); border-radius: var(--radius); background: var(--color-surface); overflow: hidden; }
+.progress progress::-webkit-progress-bar { background: var(--color-surface); }
+.progress progress::-webkit-progress-value { background: var(--color-accent); }
+.progress progress::-moz-progress-bar { background: var(--color-accent); }
+
 .empty {
     border: 1px dashed var(--color-border);
     border-radius: var(--radius);

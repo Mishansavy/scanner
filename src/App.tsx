@@ -2,20 +2,22 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import type { Filter, Page, Rotation } from './types';
 import { detectImageKind } from './lib/sniff';
-import { buildPdf, PAGE_SIZES } from './lib/pdf';
+import { PAGE_SIZES } from './lib/pdf';
+import { runPdfWorker } from './lib/runPdfWorker';
 import type { PageFit } from './lib/pdf';
 import { QUALITY_PRESETS } from './lib/render';
 import type { QualityPreset } from './lib/render';
 import { CropEditor } from './components/CropEditor';
 import { PagePreview } from './components/PagePreview';
 import { ThemeToggle } from './components/ThemeToggle';
+import { ProgressBar } from './components/ProgressBar';
 import './App.css';
 
 export default function App() {
   const [pages, setPages] = useState<Page[]>([]);
   const [fit, setFit] = useState<PageFit>('a4');
   const [quality, setQuality] = useState<QualityPreset>('balanced');
-  const [progressLabel, setProgressLabel] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ completed: number; total: number } | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
@@ -85,12 +87,12 @@ export default function App() {
 
   async function exportPdf() {
     const total = pages.length;
-    setProgressLabel(`0/${total}`);
+    setProgress({ completed: 0, total });
     try {
-      const pdfBytes = await buildPdf(pages, fit, quality, (completed) =>
-        setProgressLabel(`${completed}/${total}`),
+      const pdfBytes = await runPdfWorker({ pages, fit, quality }, (completed) =>
+        setProgress({ completed, total }),
       );
-      const downloadUrl = URL.createObjectURL(new Blob([new Uint8Array(pdfBytes)],{ type: 'application/pdf' }));
+      const downloadUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
       const downloadLink = document.createElement('a');
       downloadLink.href = downloadUrl;
       downloadLink.download = `scan-${Date.now()}.pdf`;
@@ -99,7 +101,7 @@ export default function App() {
     } catch (error) {
       setErrors([String(error)]);
     } finally {
-      setProgressLabel(null);
+      setProgress(null);
     }
   }
 
@@ -174,12 +176,14 @@ export default function App() {
         </select>
         <button
           className="btn-primary"
-          disabled={!pages.length || progressLabel !== null}
+          disabled={!pages.length || progress !== null}
           onClick={exportPdf}
         >
-          {progressLabel ? `Building ${progressLabel}` : `Export PDF (${pages.length})`}
+          {progress ? `Building ${progress.completed}/${progress.total}` : `Export PDF (${pages.length})`}
         </button>
       </div>
+
+      {progress && <ProgressBar completed={progress.completed} total={progress.total} />}
 
       {errors.map((message) => (
         <p key={message} className="err">{message}</p>

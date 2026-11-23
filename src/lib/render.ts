@@ -15,10 +15,9 @@ const JPEG_QUALITY = QUALITY_PRESETS.balanced.jpegQuality;
 
 export type RenderedPage = { bytes: ArrayBuffer; width: number; height: number };
 
+// OffscreenCanvas so this runs in a worker, which has no DOM.
 function createCanvas(width: number, height: number) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
+  const canvas = new OffscreenCanvas(width, height);
   const context = canvas.getContext('2d', { willReadFrequently: true })!;
   return { canvas, context };
 }
@@ -64,13 +63,7 @@ export async function renderPage(
   outputContext.rotate((page.rotation * Math.PI) / 180);
   outputContext.drawImage(processed.canvas, -image.width / 2, -image.height / 2);
 
-  const blob = await new Promise<Blob>((resolve, reject) =>
-    outputCanvas.toBlob(
-      (result) => (result ? resolve(result) : reject(new Error('Encode failed'))),
-      'image/jpeg',
-      jpegQuality,
-    ),
-  );
+  const blob = await outputCanvas.convertToBlob({ type: 'image/jpeg', quality: jpegQuality });
 
   return {
     bytes: await blob.arrayBuffer(),
