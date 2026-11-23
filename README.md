@@ -1,49 +1,56 @@
 # Scanner
 
-A browser app that turns a batch of photos into one PDF. Everything runs on the device. No server, no upload.
+A document scanner that runs in the browser. Add photos of pages, crop each one flat, clean it up, and download a single PDF. Your photos never leave your device.
 
-Input: JPG, PNG, WEBP. Output: one PDF, one page per image, in the order you set.
+Live site: https://mishansavy.github.io/scanner/
 
-## Features
+## What you get
 
-- Add by file picker, drag and drop, or phone camera.
-- Reorder, rotate and remove pages.
-- Four-corner crop with perspective correction, a magnifier, and edge and frame dragging.
-- Auto edge detect with OpenCV.js, loaded only when requested.
-- Filters: Original, Gray, and B&W document (adaptive threshold).
-- Page size: A4, Letter, or the image size. Quality: Small file, Balanced, High quality.
-- The PDF builds in a Web Worker with a progress bar.
+- Add JPG, PNG and WEBP files by picking, dragging, or using the phone camera. Reorder, rotate and remove pages.
+- A four-corner crop with perspective correction. A page shot at an angle comes out flat with straight edges. Dragging a corner shows a magnifier.
+- Auto detect finds the page outline for you. It loads OpenCV only when you ask, so the first visit stays light.
+- Filters: Original, Gray, and B&W document, which uses adaptive thresholding so shadows do not turn into black blotches.
+- Page size A4, Letter or the image size, and three quality presets: Small file, Balanced and High quality.
+- The PDF builds in a Web Worker with a progress bar, so the page stays responsive on large batches.
 - System, light and dark themes.
 
-## Run
+The crop math (a homography solved from four point pairs, then a bilinear warp) and the filters are written by hand. `docs/architecture.md` has the details.
+
+## Run it locally
+
+You need Node 22.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173/.
+Open http://localhost:5173/. There is no backend and no token.
 
 ```bash
 npm run build    # type check and production build
 npm run lint
 ```
 
+## Privacy
+
+Everything happens in your browser. Images are decoded, cropped and encoded on your device, and the PDF is made there too. There is no server and no upload. The only network requests are the page itself, the IBM Plex fonts from Google Fonts, and the OpenCV bundle if you click Auto detect.
+
 ## Browser support
 
 Needs `OffscreenCanvas` and module workers: Chrome 80+, Firefox 114+, Safari 16.4+.
 
-## Stack
-
-React 19, TypeScript, Vite, pdf-lib, and @techstark/opencv-js (lazy). The crop math (homography, warp) and the filters are written by hand.
-
-## Docs
-
-- [Architecture](docs/architecture.md)
-- [Manual test checklist](docs/manual-test-checklist.md)
-
 ## Known limits
 
-- Auto detect needs a clear edge between the page and the surface. Low contrast fails, and the editor says so.
-- Thumbnails render through the full pipeline, so many large photos make them slow to refresh.
-- Drag-to-reorder is not built. Pages move with Earlier and Later.
+- Auto detect needs a clear edge between the page and the surface. On low contrast it says so and you set the corners by hand. It has only been tuned on synthetic images, so real-photo reports are welcome.
+- Pages move with Earlier and Later. Drag-to-reorder is not built.
+- An export in progress cannot be cancelled.
+- There are no automated tests yet. [docs/manual-test-checklist.md](docs/manual-test-checklist.md) covers what to check by hand.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Photos where auto detect fails and bugs from real phones are especially useful. Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## License
+
+[MIT](LICENSE)
