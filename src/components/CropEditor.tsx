@@ -58,7 +58,8 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
     const context = canvas.getContext('2d')!;
     context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
-    context.strokeStyle = '#0af';
+    const accent = getComputedStyle(canvas).getPropertyValue('--color-accent').trim();
+    context.strokeStyle = accent;
     context.lineWidth = 2;
     context.beginPath();
     corners.forEach((corner, index) => {
@@ -68,14 +69,11 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
     context.closePath();
     context.stroke();
 
-    context.fillStyle = '#0af';
+    context.fillStyle = accent;
     corners.forEach((corner) => {
-      context.fillRect(
-        corner.x * scale - HANDLE_SIZE / 2,
-        corner.y * scale - HANDLE_SIZE / 2,
-        HANDLE_SIZE,
-        HANDLE_SIZE,
-      );
+      context.beginPath();
+      context.arc(corner.x * scale, corner.y * scale, HANDLE_SIZE / 2, 0, Math.PI * 2);
+      context.fill();
     });
   }, [bitmap, corners]);
 
@@ -125,7 +123,9 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
         onPointerUp={handlePointerUp}
       />
       <div className="row">
-        <button disabled={!bitmap} onClick={() => onSave(corners)}>Save crop</button>
+        <button className="btn-primary" disabled={!bitmap} onClick={() => onSave(corners)}>
+          Save crop
+        </button>
         <button onClick={() => onSave(null)}>Reset</button>
         <button onClick={onCancel}>Cancel</button>
       </div>
