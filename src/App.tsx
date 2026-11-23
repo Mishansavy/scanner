@@ -107,7 +107,10 @@ export default function App() {
 
   return (
     <main>
-      <h1>Scanner</h1>
+      <header className="header">
+        <h1>Scanner</h1>
+        <p>JPG / PNG / WEBP to one PDF, on this device</p>
+      </header>
 
       <div className="bar">
         <label className="btn">
@@ -130,11 +133,16 @@ export default function App() {
             onChange={handleFileInput}
           />
         </label>
+        <span className="spacer" />
         <select value={fit} onChange={(event) => setFit(event.target.value as PageFit)}>
           <option value="a4">A4</option>
           <option value="image">Image size</option>
         </select>
-        <button disabled={!pages.length || progressLabel !== null} onClick={exportPdf}>
+        <button
+          className="btn-primary"
+          disabled={!pages.length || progressLabel !== null}
+          onClick={exportPdf}
+        >
           {progressLabel ? `Building ${progressLabel}` : `Export PDF (${pages.length})`}
         </button>
       </div>
@@ -143,30 +151,40 @@ export default function App() {
         <p key={message} className="err">{message}</p>
       ))}
 
+      {pages.length === 0 && (
+        <p className="empty">No pages yet. Add images or use the camera.</p>
+      )}
+
       <ol className="grid">
         {pages.map((page, index) => (
-          <li key={page.id}>
-            <img
-              src={page.url}
-              alt=""
-              style={{
-                transform: `rotate(${page.rotation}deg)`,
-                filter: PREVIEW_FILTERS[page.filter],
-              }}
-            />
+          <li key={page.id} className="card">
+            <div className="card-head">
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              {page.corners && <span className="flag">cropped</span>}
+            </div>
+            <div className="thumb">
+              <img
+                src={page.url}
+                alt={`Page ${index + 1}`}
+                style={{
+                  transform: `rotate(${page.rotation}deg)`,
+                  filter: PREVIEW_FILTERS[page.filter],
+                }}
+              />
+            </div>
             <div className="row">
-              <button onClick={() => movePage(index, -1)}>←</button>
-              <button onClick={() => movePage(index, 1)}>→</button>
+              <button disabled={index === 0} onClick={() => movePage(index, -1)}>Earlier</button>
+              <button disabled={index === pages.length - 1} onClick={() => movePage(index, 1)}>
+                Later
+              </button>
               <button
                 onClick={() =>
                   updatePage(page.id, { rotation: ((page.rotation + 90) % 360) as Rotation })
                 }
               >
-                ⟳
+                Rotate
               </button>
-              <button onClick={() => setEditingPageId(page.id)}>
-                {page.corners ? 'Crop ✓' : 'Crop'}
-              </button>
+              <button onClick={() => setEditingPageId(page.id)}>Crop</button>
               <select
                 value={page.filter}
                 onChange={(event) => updatePage(page.id, { filter: event.target.value as Filter })}
@@ -175,7 +193,7 @@ export default function App() {
                 <option value="gray">Gray</option>
                 <option value="bw">B&amp;W</option>
               </select>
-              <button onClick={() => removePage(page.id)}>✕</button>
+              <button className="danger" onClick={() => removePage(page.id)}>Remove</button>
             </div>
           </li>
         ))}
