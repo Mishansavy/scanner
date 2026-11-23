@@ -1,75 +1,49 @@
-# React + TypeScript + Vite
+# Scanner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser app that turns a batch of photos into one PDF. Everything runs on the device. No server, no upload.
 
-Currently, two official plugins are available:
+Input: JPG, PNG, WEBP. Output: one PDF, one page per image, in the order you set.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Add by file picker, drag and drop, or phone camera.
+- Reorder, rotate and remove pages.
+- Four-corner crop with perspective correction, a magnifier, and edge and frame dragging.
+- Auto edge detect with OpenCV.js, loaded only when requested.
+- Filters: Original, Gray, and B&W document (adaptive threshold).
+- Page size: A4, Letter, or the image size. Quality: Small file, Balanced, High quality.
+- The PDF builds in a Web Worker with a progress bar.
+- System, light and dark themes.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Open http://localhost:5173/.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run build    # type check and production build
+npm run lint
 ```
+
+## Browser support
+
+Needs `OffscreenCanvas` and module workers: Chrome 80+, Firefox 114+, Safari 16.4+.
+
+## Stack
+
+React 19, TypeScript, Vite, pdf-lib, and @techstark/opencv-js (lazy). The crop math (homography, warp) and the filters are written by hand.
+
+## Docs
+
+- [Architecture](docs/architecture.md)
+- [Manual test checklist](docs/manual-test-checklist.md)
+
+## Known limits
+
+- Auto detect needs a clear edge between the page and the surface. Low contrast fails, and the editor says so.
+- Thumbnails render through the full pipeline, so many large photos make them slow to refresh.
+- Drag-to-reorder is not built. Pages move with Earlier and Later.
