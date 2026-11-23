@@ -6,6 +6,7 @@ import { buildPdf } from './lib/pdf';
 import type { PageFit } from './lib/pdf';
 import { CropEditor } from './components/CropEditor';
 import { PagePreview } from './components/PagePreview';
+import { ThemeToggle } from './components/ThemeToggle';
 import './App.css';
 
 export default function App() {
@@ -121,7 +122,10 @@ export default function App() {
     >
       <header className="header">
         <h1>Scanner</h1>
-        <p>JPG / PNG / WEBP to one PDF, on this device</p>
+        <div className="header-meta">
+          <p>JPG / PNG / WEBP to one PDF, on this device</p>
+          <ThemeToggle />
+        </div>
       </header>
 
       <div className="bar">
