@@ -16,6 +16,13 @@ updates:
       interval: weekly
     commit-message:
       prefix: deps
+    ignore:
+      # typescript-eslint caps its TypeScript peer below 6.1.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # Types must match the Node major used in CI and local dev.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       dependencies:
         patterns: ["*"]
