@@ -2,7 +2,7 @@
 
 A document scanner that runs in the browser. Add photos of pages, crop each one flat, clean it up, and download a single PDF. Your photos never leave your device.
 
-Live site: https://mishansavy.github.io/scanner/
+Live site: https://scanner.mishanshah.com.np/
 
 ## What you get
 

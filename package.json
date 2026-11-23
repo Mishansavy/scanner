@@ -5,7 +5,7 @@
   "description": "Turn a batch of photos into one PDF, entirely in the browser.",
   "license": "MIT",
   "repository": "github:Mishansavy/scanner",
-  "homepage": "https://mishansavy.github.io/scanner/",
+  "homepage": "https://scanner.mishanshah.com.np/",
   "type": "module",
   "scripts": {
     "dev": "vite",
