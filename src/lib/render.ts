@@ -15,9 +15,12 @@ function createCanvas(width: number, height: number) {
   return { canvas, context };
 }
 
-export async function renderPage(page: Page): Promise<RenderedPage> {
+export async function renderPage(
+  page: Page,
+  maxLongEdge = MAX_LONG_EDGE,
+): Promise<RenderedPage> {
   const bitmap = await createImageBitmap(page.file, { imageOrientation: 'from-image' });
-  const scale = Math.min(1, MAX_LONG_EDGE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, maxLongEdge / Math.max(bitmap.width, bitmap.height));
   const scaledWidth = Math.round(bitmap.width * scale);
   const scaledHeight = Math.round(bitmap.height * scale);
 

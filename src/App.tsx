@@ -5,13 +5,8 @@ import { detectImageKind } from './lib/sniff';
 import { buildPdf } from './lib/pdf';
 import type { PageFit } from './lib/pdf';
 import { CropEditor } from './components/CropEditor';
+import { PagePreview } from './components/PagePreview';
 import './App.css';
-
-const PREVIEW_FILTERS: Record<Filter, string> = {
-  original: 'none',
-  gray: 'grayscale(1)',
-  bw: 'grayscale(1) contrast(3)',
-};
 
 export default function App() {
   const [pages, setPages] = useState<Page[]>([]);
@@ -163,14 +158,7 @@ export default function App() {
               {page.corners && <span className="flag">cropped</span>}
             </div>
             <div className="thumb">
-              <img
-                src={page.url}
-                alt={`Page ${index + 1}`}
-                style={{
-                  transform: `rotate(${page.rotation}deg)`,
-                  filter: PREVIEW_FILTERS[page.filter],
-                }}
-              />
+              <PagePreview page={page} label={`Page ${index + 1}`} />
             </div>
             <div className="row">
               <button disabled={index === 0} onClick={() => movePage(index, -1)}>Earlier</button>
