@@ -49,6 +49,13 @@ export function isClockwiseConvexQuad(corners: Point[]): boolean {
   });
 }
 
+// Orders four unordered points as TL, TR, BR, BL.
+export function orderCorners(points: Point[]): Point[] {
+  const bySum = [...points].sort((first, second) => first.x + first.y - (second.x + second.y));
+  const byDifference = [...points].sort((first, second) => first.y - first.x - (second.y - second.x));
+  return [bySum[0], byDifference[0], bySum[3], byDifference[3]];
+}
+
 export function isInsideClockwiseQuad(point: Point, corners: Point[]): boolean {
   return corners.every((corner, index) => {
     const next = corners[(index + 1) % 4];

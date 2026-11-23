@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { Point } from '../types';
 import { isClockwiseConvexQuad, isInsideClockwiseQuad } from '../lib/geometry';
+import { detectDocumentCorners } from '../lib/detectCorners';
 
 type CropEditorProps = {
   file: File;
@@ -25,6 +26,7 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
   const [bitmap, setBitmap] = useState<ImageBitmap | null>(null);
   const [corners, setCorners] = useState<Point[]>([]);
   const [loupeFocus, setLoupeFocus] = useState<Point | null>(null);
+  const [detectState, setDetectState] = useState<'idle' | 'running' | 'not-found' | 'failed'>('idle');
   const drag = useRef<Drag | null>(null);
   const displayScale = useRef(1);
 
@@ -220,6 +222,18 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
 
   const isValid = corners.length === 4 && isClockwiseConvexQuad(corners);
 
+  const handleAutoDetect = async () => {
+    if (!bitmap) return;
+    setDetectState('running');
+    try {
+      const detected = await detectDocumentCorners(bitmap);
+      if (detected) setCorners(detected);
+      setDetectState(detected ? 'idle' : 'not-found');
+    } catch {
+      setDetectState('failed');
+    }
+  };
+
   const handlePointerUp = () => {
     drag.current = null;
     setLoupeFocus(null);
@@ -236,7 +250,12 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
         onPointerCancel={handlePointerUp}
       />
       {bitmap && !isValid && <p className="err">Corners cross. Drag them back into order.</p>}
+      {detectState === 'not-found' && <p className="err">No page outline found. Set the corners by hand.</p>}
+      {detectState === 'failed' && <p className="err">Auto detect could not load. Set the corners by hand.</p>}
       <div className="row">
+        <button disabled={!bitmap || detectState === 'running'} onClick={handleAutoDetect}>
+          {detectState === 'running' ? 'Detecting' : 'Auto detect'}
+        </button>
         <button className="btn-primary" disabled={!bitmap || !isValid} onClick={() => onSave(corners)}>
           Save crop
         </button>
