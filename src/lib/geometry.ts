@@ -40,6 +40,15 @@ export function computeHomography(fromPoints: Point[], toPoints: Point[]): numbe
   return [...solveLinearSystem(coefficients, constants), 1];
 }
 
+// True when TL, TR, BR, BL form a clockwise convex quad; crossed or mirrored corners break the warp.
+export function isClockwiseConvexQuad(corners: Point[]): boolean {
+  return corners.every((corner, index) => {
+    const next = corners[(index + 1) % 4];
+    const after = corners[(index + 2) % 4];
+    return (next.x - corner.x) * (after.y - next.y) - (next.y - corner.y) * (after.x - next.x) > 0;
+  });
+}
+
 function readChannel(
   pixels: Uint8ClampedArray,
   width: number,

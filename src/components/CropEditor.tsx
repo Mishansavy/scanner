@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { Point } from '../types';
+import { isClockwiseConvexQuad } from '../lib/geometry';
 
 type CropEditorProps = {
   file: File;
@@ -58,8 +59,10 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
     const context = canvas.getContext('2d')!;
     context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
-    const accent = getComputedStyle(canvas).getPropertyValue('--color-accent').trim();
-    context.strokeStyle = accent;
+    const tokens = getComputedStyle(canvas);
+    const accent = tokens.getPropertyValue('--color-accent').trim();
+    const danger = tokens.getPropertyValue('--color-danger').trim();
+    context.strokeStyle = isClockwiseConvexQuad(corners) ? accent : danger;
     context.lineWidth = 2;
     context.beginPath();
     corners.forEach((corner, index) => {
@@ -109,6 +112,8 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
     );
   };
 
+  const isValid = corners.length === 4 && isClockwiseConvexQuad(corners);
+
   const handlePointerUp = () => {
     draggingIndex.current = null;
   };
@@ -122,8 +127,9 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
       />
+      {bitmap && !isValid && <p className="err">Corners cross. Drag them back into order.</p>}
       <div className="row">
-        <button className="btn-primary" disabled={!bitmap} onClick={() => onSave(corners)}>
+        <button className="btn-primary" disabled={!bitmap || !isValid} onClick={() => onSave(corners)}>
           Save crop
         </button>
         <button onClick={() => onSave(null)}>Reset</button>
