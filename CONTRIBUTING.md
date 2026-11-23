@@ -17,7 +17,7 @@ Open http://localhost:5173/. There is no backend and no token to set up. [docs/a
 
 - **Real-photo testing:** run [docs/manual-test-checklist.md](docs/manual-test-checklist.md) on your browser and phone, and report anything that fails.
 - **Auto detect:** the thresholds at the top of `src/lib/detectCorners.ts` were tuned on synthetic images only. Photos where it picks the wrong shape are the most useful reports.
-- **Drag-to-reorder:** not built yet. Pages move with Earlier and Later buttons.
+- **Touch reorder:** drag-to-reorder uses native drag and drop, which most touch screens ignore. A pointer-based version would fix that.
 - **Cancel an export:** the worker cannot be stopped mid-build yet.
 - **Tests:** there are no automated tests. The crop math in `src/lib/geometry.ts` is pure and easy to cover.
 

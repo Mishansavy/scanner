@@ -25,5 +25,5 @@ export function PagePreview({ page, label }: { page: Page; label: string }) {
     };
   }, [page.file, page.corners, page.filter, page.rotation]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return previewUrl ? <img src={previewUrl} alt={label} /> : null;
+  return previewUrl ? <img src={previewUrl} alt={label} draggable={false} /> : null;
 }

@@ -92,6 +92,6 @@ Type is IBM Plex Sans for text and IBM Plex Mono for numbers and labels. Control
 
 ## Not built
 
-- Drag-to-reorder. Pages move with Earlier and Later.
+- Touch drag-to-reorder. Cards use native drag and drop (`movePageTo` in `App.tsx`), which most touch screens ignore, so Earlier and Later remain.
 - Cancelling an export in progress.
 - Browser testing and automated tests. See the [manual checklist](manual-test-checklist.md).

@@ -27,6 +27,7 @@
     --space-8: 40px;
 
     --radius: 2px;
+  --opacity-dragging: 0.4;
     --border: 1px solid var(--color-border);
 }
 
@@ -189,6 +190,9 @@ button:disabled {
     padding: var(--space-3);
 }
 
+.card { cursor: grab; }
+.card.dragging { opacity: var(--opacity-dragging); }
+.card.drop-target { border-color: var(--color-accent); }
 .card-head {
     display: flex;
     justify-content: space-between;

@@ -6,7 +6,7 @@ Live site: https://mishansavy.github.io/scanner/
 
 ## What you get
 
-- Add JPG, PNG and WEBP files by picking, dragging, or using the phone camera. Reorder, rotate and remove pages.
+- Add JPG, PNG and WEBP files by picking, dragging, or using the phone camera. Reorder by dragging cards, rotate and remove pages.
 - A four-corner crop with perspective correction. A page shot at an angle comes out flat with straight edges. Dragging a corner shows a magnifier.
 - Auto detect finds the page outline for you. It loads OpenCV only when you ask, so the first visit stays light.
 - Filters: Original, Gray, and B&W document, which uses adaptive thresholding so shadows do not turn into black blotches.
@@ -43,7 +43,7 @@ Needs `OffscreenCanvas` and module workers: Chrome 80+, Firefox 114+, Safari 16.
 ## Known limits
 
 - Auto detect needs a clear edge between the page and the surface. On low contrast it says so and you set the corners by hand. It has only been tuned on synthetic images, so real-photo reports are welcome.
-- Pages move with Earlier and Later. Drag-to-reorder is not built.
+- Drag-to-reorder uses native drag and drop, which works with a mouse but not on most touch screens. Earlier and Later buttons cover touch.
 - An export in progress cannot be cancelled.
 - There are no automated tests yet. [docs/manual-test-checklist.md](docs/manual-test-checklist.md) covers what to check by hand.
 

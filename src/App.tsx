@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, DragEvent } from 'react';
 import type { Filter, Page, Rotation } from './types';
 import { detectImageKind } from './lib/sniff';
 import { PAGE_SIZES } from './lib/pdf';
@@ -21,6 +21,8 @@ export default function App() {
   const [errors, setErrors] = useState<string[]>([]);
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
+  const [draggingPageId, setDraggingPageId] = useState<string | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
 
   const pagesRef = useRef(pages);
   useEffect(() => {
@@ -85,6 +87,27 @@ export default function App() {
     });
   }
 
+  function carriesFiles(event: DragEvent<HTMLElement>) {
+    return event.dataTransfer.types.includes('Files');
+  }
+
+  function movePageTo(sourceId: string, targetId: string) {
+    if (sourceId === targetId) return;
+    setPages((previous) => {
+      const moving = previous.find((page) => page.id === sourceId);
+      if (!moving) return previous;
+      const remaining = previous.filter((page) => page.id !== sourceId);
+      const targetIndex = previous.findIndex((page) => page.id === targetId);
+      remaining.splice(targetIndex, 0, moving);
+      return remaining;
+    });
+  }
+
+  function endPageDrag() {
+    setDraggingPageId(null);
+    setDropTargetId(null);
+  }
+
   async function exportPdf() {
     const total = pages.length;
     setProgress({ completed: 0, total });
@@ -111,6 +134,7 @@ export default function App() {
     <main
       className={isDraggingFiles ? 'dropping' : undefined}
       onDragOver={(event) => {
+        if (!carriesFiles(event)) return;
         event.preventDefault();
         setIsDraggingFiles(true);
       }}
@@ -120,6 +144,7 @@ export default function App() {
         }
       }}
       onDrop={(event) => {
+        if (!carriesFiles(event)) return;
         event.preventDefault();
         setIsDraggingFiles(false);
         addFiles(event.dataTransfer.files);
@@ -195,7 +220,34 @@ export default function App() {
 
       <ol className="grid">
         {pages.map((page, index) => (
-          <li key={page.id} className="card">
+          <li
+            key={page.id}
+            className={[
+              'card',
+              draggingPageId === page.id && 'dragging',
+              dropTargetId === page.id && 'drop-target',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            draggable
+            onDragStart={(event) => {
+              event.dataTransfer.effectAllowed = 'move';
+              event.dataTransfer.setData('text/plain', page.id);
+              setDraggingPageId(page.id);
+            }}
+            onDragOver={(event) => {
+              if (!draggingPageId) return;
+              event.preventDefault();
+              setDropTargetId(page.id);
+            }}
+            onDrop={(event) => {
+              if (!draggingPageId) return;
+              event.preventDefault();
+              movePageTo(draggingPageId, page.id);
+              endPageDrag();
+            }}
+            onDragEnd={endPageDrag}
+          >
             <div className="card-head">
               <span>{String(index + 1).padStart(2, '0')}</span>
               {page.corners && <span className="flag">cropped</span>}

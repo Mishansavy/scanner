@@ -16,6 +16,10 @@ Start the app with `npm run dev`, open http://localhost:5173/.
 ## Page controls
 
 - [ ] Earlier and Later change the order. Earlier is disabled on card 01, Later on the last card.
+- [ ] Drag a card onto another. The target gets an accent border, the dragged card fades, and on drop it takes the target's slot. Numbers update.
+- [ ] Dragging a card does not show the file-drop outline or add anything.
+- [ ] Drag the last card to the first slot and the first to the last. Both work.
+- [ ] Export after reordering. The PDF page order matches the screen.
 - [ ] Rotate turns the thumbnail 90 degrees each click and returns to the start after four.
 - [ ] Remove deletes the card. DevTools, Memory: no growth in blob URLs after adding and removing 20 images.
 - [ ] A portrait phone photo shows upright in the thumbnail and in the exported PDF.
