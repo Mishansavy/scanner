@@ -13,6 +13,8 @@ permissions: {}
 
 jobs:
   deploy:
+    # Skipped until Pages is enabled and the PAGES_ENABLED repository variable is "true".
+    if: vars.PAGES_ENABLED == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
