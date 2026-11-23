@@ -16,11 +16,15 @@ const CORNER_RADIUS = 11;
 const EDGE_RADIUS = 7;
 const HIT_RADIUS = 28;
 const DEFAULT_INSET = 0.05;
+const LOUPE_RADIUS = 64;
+const LOUPE_MARGIN = 12;
+const LOUPE_ZOOM = 3;
 
 export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [bitmap, setBitmap] = useState<ImageBitmap | null>(null);
   const [corners, setCorners] = useState<Point[]>([]);
+  const [loupeFocus, setLoupeFocus] = useState<Point | null>(null);
   const drag = useRef<Drag | null>(null);
   const displayScale = useRef(1);
 
@@ -109,7 +113,52 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
       drawHandle({ x: (corner.x + next.x) / 2, y: (corner.y + next.y) / 2 }, EDGE_RADIUS, surface, accent);
     });
     scaled.forEach((corner) => drawHandle(corner, CORNER_RADIUS, accent, surface));
-  }, [bitmap, corners]);
+
+    if (!loupeFocus) return;
+    const ink = tokens.getPropertyValue('--color-ink').trim();
+    const diameter = LOUPE_RADIUS * 2;
+    const focusX = loupeFocus.x * scale;
+    const focusY = loupeFocus.y * scale;
+    const isNearTopLeft =
+      focusX < diameter + LOUPE_MARGIN * 2 && focusY < diameter + LOUPE_MARGIN * 2;
+    const centerX = isNearTopLeft ? canvas.width - LOUPE_RADIUS - LOUPE_MARGIN : LOUPE_RADIUS + LOUPE_MARGIN;
+    const centerY = LOUPE_RADIUS + LOUPE_MARGIN;
+
+    context.save();
+    context.beginPath();
+    context.arc(centerX, centerY, LOUPE_RADIUS, 0, Math.PI * 2);
+    context.clip();
+    context.fillStyle = surface;
+    context.fillRect(centerX - LOUPE_RADIUS, centerY - LOUPE_RADIUS, diameter, diameter);
+    const sourceSize = diameter / (scale * LOUPE_ZOOM);
+    context.drawImage(
+      bitmap,
+      loupeFocus.x - sourceSize / 2,
+      loupeFocus.y - sourceSize / 2,
+      sourceSize,
+      sourceSize,
+      centerX - LOUPE_RADIUS,
+      centerY - LOUPE_RADIUS,
+      diameter,
+      diameter,
+    );
+    context.restore();
+
+    context.lineWidth = 1;
+    context.strokeStyle = accent;
+    context.beginPath();
+    context.moveTo(centerX - LOUPE_RADIUS, centerY);
+    context.lineTo(centerX + LOUPE_RADIUS, centerY);
+    context.moveTo(centerX, centerY - LOUPE_RADIUS);
+    context.lineTo(centerX, centerY + LOUPE_RADIUS);
+    context.stroke();
+
+    context.lineWidth = 2;
+    context.strokeStyle = ink;
+    context.beginPath();
+    context.arc(centerX, centerY, LOUPE_RADIUS, 0, Math.PI * 2);
+    context.stroke();
+  }, [bitmap, corners, loupeFocus]);
 
   const toImagePoint = (event: ReactPointerEvent<HTMLCanvasElement>): Point => {
     const canvas = event.currentTarget;
@@ -142,6 +191,7 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
     const affected = findAffectedIndices(pointer);
     if (!affected) return;
     drag.current = { affected, last: pointer };
+    setLoupeFocus(affected.length === 1 ? corners[affected[0]] : pointer);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -161,17 +211,18 @@ export function CropEditor({ file, initialCorners, onSave, onCancel }: CropEdito
     );
 
     active.last = { x: active.last.x + deltaX, y: active.last.y + deltaY };
-    setCorners(
-      corners.map((corner, index) =>
-        active.affected.includes(index) ? { x: corner.x + deltaX, y: corner.y + deltaY } : corner,
-      ),
+    const nextCorners = corners.map((corner, index) =>
+      active.affected.includes(index) ? { x: corner.x + deltaX, y: corner.y + deltaY } : corner,
     );
+    setCorners(nextCorners);
+    setLoupeFocus(active.affected.length === 1 ? nextCorners[active.affected[0]] : active.last);
   };
 
   const isValid = corners.length === 4 && isClockwiseConvexQuad(corners);
 
   const handlePointerUp = () => {
     drag.current = null;
+    setLoupeFocus(null);
   };
 
   return (
