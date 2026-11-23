@@ -1,0 +1,29 @@
+name: Bug report
+description: Something in the app is broken
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Include the steps, and any console error.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      description: For example Chrome 130 on macOS, or Safari on iPhone 15.
+    validations:
+      required: true
+  - type: input
+    id: file-type
+    attributes:
+      label: Image type and size
+      description: For example JPG, 12 MP, taken on a phone. Leave blank if it does not apply.

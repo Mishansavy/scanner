@@ -1,0 +1,27 @@
+name: Auto detect missed the page
+description: Auto detect found the wrong outline or none at all
+labels: [detection]
+body:
+  - type: textarea
+    id: photo
+    attributes:
+      label: What the photo looks like
+      description: The surface, the lighting and the page colour. Attach the photo if you can share it.
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: What happened
+      options:
+        - No outline found
+        - Corners on the wrong shape
+        - Corners close but not on the edges
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+    validations:
+      required: true
