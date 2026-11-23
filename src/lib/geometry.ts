@@ -49,6 +49,13 @@ export function isClockwiseConvexQuad(corners: Point[]): boolean {
   });
 }
 
+export function isInsideClockwiseQuad(point: Point, corners: Point[]): boolean {
+  return corners.every((corner, index) => {
+    const next = corners[(index + 1) % 4];
+    return (next.x - corner.x) * (point.y - corner.y) - (next.y - corner.y) * (point.x - corner.x) >= 0;
+  });
+}
+
 function readChannel(
   pixels: Uint8ClampedArray,
   width: number,
