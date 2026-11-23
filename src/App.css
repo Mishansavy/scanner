@@ -154,6 +154,8 @@ button:disabled {
     flex: 1;
 }
 
+.dropping { outline: 2px dashed var(--color-accent); outline-offset: -8px; }
+
 .empty {
     border: 1px dashed var(--color-border);
     border-radius: var(--radius);

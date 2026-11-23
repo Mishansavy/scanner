@@ -14,6 +14,7 @@ export default function App() {
   const [progressLabel, setProgressLabel] = useState<string | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
 
   const pagesRef = useRef(pages);
   useEffect(() => {
@@ -101,7 +102,23 @@ export default function App() {
   const editingPage = pages.find((page) => page.id === editingPageId);
 
   return (
-    <main>
+    <main
+      className={isDraggingFiles ? 'dropping' : undefined}
+      onDragOver={(event) => {
+        event.preventDefault();
+        setIsDraggingFiles(true);
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsDraggingFiles(false);
+        }
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        setIsDraggingFiles(false);
+        addFiles(event.dataTransfer.files);
+      }}
+    >
       <header className="header">
         <h1>Scanner</h1>
         <p>JPG / PNG / WEBP to one PDF, on this device</p>
@@ -147,7 +164,7 @@ export default function App() {
       ))}
 
       {pages.length === 0 && (
-        <p className="empty">No pages yet. Add images or use the camera.</p>
+        <p className="empty">No pages yet. Drop images here, add them, or use the camera.</p>
       )}
 
       <ol className="grid">
